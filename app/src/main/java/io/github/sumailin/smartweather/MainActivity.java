@@ -1,12 +1,12 @@
 package io.github.sumailin.smartweather;
 
+import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -14,14 +14,31 @@ import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import io.github.sumailin.smartweather.api.Const;
+import io.github.sumailin.smartweather.api.WeatherService;
+import io.github.sumailin.smartweather.model.WeatherInfo;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import okhttp3.ResponseBody;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity {
 
   @Bind(R.id.main_toolbar) Toolbar mToolbar;
   @Bind(R.id.main_drawer_layout) DrawerLayout mDrawerLayout;
-  @Bind(R.id.main_recyclerview) RecyclerView mWeatherList;
+  //@Bind(R.id.main_recyclerview) RecyclerView mWeatherList;
+  @Bind(R.id.main_show) TextView mShow;
 
   //声明AMapLocationClient类对象
   private AMapLocationClient mLocationClient = null;
@@ -52,9 +69,9 @@ public class MainActivity extends AppCompatActivity {
           Toast.makeText(MainActivity.this, aMapLocation.getProvince(), Toast.LENGTH_SHORT).show();
         } else {
           //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
-          Log.e("AmapError","location Error, ErrCode:"
-              + aMapLocation.getErrorCode() + ", errInfo:"
-              + aMapLocation.getErrorInfo());
+          Log.e("AmapError",
+              "location Error, ErrCode:" + aMapLocation.getErrorCode() + ", errInfo:" + aMapLocation
+                  .getErrorInfo());
         }
       }
     }
@@ -74,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
     toggle.syncState();
 
     initLocation();
+    requestWeather();
   }
 
   /**
@@ -104,6 +122,34 @@ public class MainActivity extends AppCompatActivity {
     mLocationClient.startLocation();
   }
 
+  private void requestWeather() {
+    LinkedHashMap<String, String> params = new LinkedHashMap<>();
+    params.put("cityid", "CN101210101");
+    params.put("key", Const.HeFengAppKey);
+
+    new Retrofit.Builder().baseUrl(Const.Domain)
+        .build()
+        .create(WeatherService.class)
+        .getWeather(params)
+        .enqueue(new Callback<ResponseBody>() {
+          @Override
+          public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            Toast.makeText(MainActivity.this, "suceess", Toast.LENGTH_SHORT).show();
+            try {
+              hanldWeather(response.body().string());
+            } catch (JSONException e) {
+              e.printStackTrace();
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+          }
+
+          @Override public void onFailure(Call<ResponseBody> call, Throwable t) {
+            Toast.makeText(MainActivity.this, "failed", Toast.LENGTH_SHORT).show();
+          }
+        });
+  }
+
   @Override protected void onPause() {
     super.onPause();
     if (mLocationClient != null) {
@@ -116,5 +162,16 @@ public class MainActivity extends AppCompatActivity {
     if (mLocationClient != null) {
       mLocationClient.onDestroy();
     }
+  }
+
+  private void hanldWeather(String content) throws JSONException {
+    JSONObject jsonObject = new JSONObject(content);
+    JSONArray dataBody = jsonObject.getJSONArray("HeWeather data service 3.0");
+
+    List<WeatherInfo> weatherInfoList = new GsonBuilder().create()
+        .fromJson(dataBody.toString(), new TypeToken<List<WeatherInfo>>() {
+        }.getType());
+
+    mShow.setText(weatherInfoList.get(0).getAqi().getCity().getAqi().toString());
   }
 }
