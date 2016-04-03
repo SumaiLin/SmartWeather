@@ -5,6 +5,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -35,30 +37,57 @@ public class WeatherRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
 
   @Override public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View view = null;
-    if (viewType == TYPE_BASIC) {
-      view = mInflater.inflate(R.layout.basic_city_layout, parent, false);
+    switch (viewType) {
+      case TYPE_BASIC:
+        view = mInflater.inflate(R.layout.basic_city_layout, parent, false);
+        return new WeatherViewHolder(view);
+      case TYPE_TWO:
+        view = mInflater.inflate(R.layout.clock_weather_layout, parent, false);
+        return new HourlyViewHolder(view);
     }
-    return new WeatherViewHolder(view);
+    return null;
   }
 
   @Override public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-    WeatherViewHolder viewHolder = (WeatherViewHolder) holder;
     if (weatherInfo != null) {
-      viewHolder.mTemperature.setText(
-          String.format(mContext.getString(R.string.temperature), weatherInfo.getNow().getTmp()));
-      viewHolder.mMaxTemperature.setText(String.format(mContext.getString(R.string.max_temperature),
-          weatherInfo.getDaily_forecast().get(0).getTmp().getMax()));
-      viewHolder.mMinTemperature.setText(String.format(mContext.getString(R.string.min_temperature),
-          weatherInfo.getDaily_forecast().get(0).getTmp().getMin()));
-      viewHolder.mAirQuality.setText(String.format(mContext.getString(R.string.air_quality),
-          weatherInfo.getAqi().getCity().getQlty()));
-      viewHolder.mPM.setText(String.format(mContext.getString(R.string.pm_quality),
-          weatherInfo.getAqi().getCity().getPm25()));
+      if (holder instanceof WeatherViewHolder) {
+        WeatherViewHolder viewHolder = (WeatherViewHolder) holder;
+        viewHolder.mTemperature.setText(
+            String.format(mContext.getString(R.string.temperature), weatherInfo.getNow().getTmp()));
+        viewHolder.mMaxTemperature.setText(
+            String.format(mContext.getString(R.string.max_temperature),
+                weatherInfo.getDaily_forecast().get(0).getTmp().getMax()));
+        viewHolder.mMinTemperature.setText(
+            String.format(mContext.getString(R.string.min_temperature),
+                weatherInfo.getDaily_forecast().get(0).getTmp().getMin()));
+        viewHolder.mAirQuality.setText(String.format(mContext.getString(R.string.air_quality),
+            weatherInfo.getAqi().getCity().getQlty()));
+        viewHolder.mPM.setText(String.format(mContext.getString(R.string.pm_quality),
+            weatherInfo.getAqi().getCity().getPm25()));
+      }
+
+      if (holder instanceof HourlyViewHolder) {
+        HourlyViewHolder viewHolder = (HourlyViewHolder) holder;
+        int size = weatherInfo.getHourly_forecast().size();
+
+        for (int i = 0; i < size; i++) {
+          View item = LayoutInflater.from(mContext).inflate(R.layout.hourly_weather_item, null);
+          ImageView mClock = (ImageView) item.findViewById(R.id.iv_clock);
+          TextView mDate = (TextView) item.findViewById(R.id.tv_date);
+          TextView mWind = (TextView) item.findViewById(R.id.tv_wind);
+
+          mClock.setBackgroundResource(R.mipmap.ic_clock);
+          mDate.setText(weatherInfo.getHourly_forecast().get(i).getDate());
+          mWind.setText(weatherInfo.getHourly_forecast().get(i).getWind().getDeg());
+
+          viewHolder.mHourlyRootView.addView(item);
+        }
+      }
     }
   }
 
   @Override public int getItemCount() {
-    return 1;
+    return 2;
   }
 
   @Override public int getItemViewType(int position) {
@@ -90,6 +119,16 @@ public class WeatherRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
     @Bind(R.id.tv_pm_quality) TextView mPM;
 
     public WeatherViewHolder(View itemView) {
+      super(itemView);
+      ButterKnife.bind(this, itemView);
+    }
+  }
+
+  static class HourlyViewHolder extends RecyclerView.ViewHolder {
+
+    @Bind(R.id.ll_hourly) LinearLayout mHourlyRootView;
+
+    public HourlyViewHolder(View itemView) {
       super(itemView);
       ButterKnife.bind(this, itemView);
     }
