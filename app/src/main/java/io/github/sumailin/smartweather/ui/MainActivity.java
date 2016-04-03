@@ -1,6 +1,7 @@
 package io.github.sumailin.smartweather.ui;
 
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -33,12 +34,14 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity
-    implements AMapLocationListener, SwipeRefreshLayout.OnRefreshListener {
+    implements AMapLocationListener, SwipeRefreshLayout.OnRefreshListener,
+    AppBarLayout.OnOffsetChangedListener {
 
   @Bind(R.id.main_toolbar) Toolbar mToolbar;
   @Bind(R.id.main_drawer_layout) DrawerLayout mDrawerLayout;
   @Bind(R.id.main_recyclerview) RecyclerView mWeatherRecyclerView;
   @Bind(R.id.main_refresh) SwipeRefreshLayout mRefresh;
+  @Bind(R.id.appBarLayout) AppBarLayout mAppBarLayout;
 
   private WeatherRecyclerViewAdapter adapter;
 
@@ -139,6 +142,11 @@ public class MainActivity extends AppCompatActivity
         });
   }
 
+  @Override protected void onResume() {
+    super.onResume();
+    mAppBarLayout.addOnOffsetChangedListener(this);
+  }
+
   @Override protected void onPause() {
     super.onPause();
     if (mLocationClient != null) {
@@ -151,6 +159,7 @@ public class MainActivity extends AppCompatActivity
     if (mLocationClient != null) {
       mLocationClient.onDestroy();
     }
+    mAppBarLayout.removeOnOffsetChangedListener(this);
   }
 
   @Override public void onLocationChanged(AMapLocation aMapLocation) {
@@ -169,5 +178,9 @@ public class MainActivity extends AppCompatActivity
 
   @Override public void onRefresh() {
 
+  }
+
+  @Override public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+    mRefresh.setEnabled(verticalOffset == 0);
   }
 }
