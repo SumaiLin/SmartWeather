@@ -1,12 +1,13 @@
 package io.github.sumailin.smartweather;
 
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -14,9 +15,12 @@ import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import io.github.sumailin.smartweather.api.Const;
+import io.github.sumailin.smartweather.api.ResponseAdapterFactory;
+import io.github.sumailin.smartweather.api.ResponseException;
 import io.github.sumailin.smartweather.api.WeatherService;
 import io.github.sumailin.smartweather.model.WeatherInfo;
 import java.io.IOException;
@@ -32,13 +36,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
   @Bind(R.id.main_toolbar) Toolbar mToolbar;
   @Bind(R.id.main_drawer_layout) DrawerLayout mDrawerLayout;
-  //@Bind(R.id.main_recyclerview) RecyclerView mWeatherList;
-  @Bind(R.id.main_show) TextView mShow;
+  @Bind(R.id.main_recyclerview) RecyclerView mWeatherRecyclerView;
 
   //声明AMapLocationClient类对象
   private AMapLocationClient mLocationClient = null;
@@ -90,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
     mDrawerLayout.addDrawerListener(toggle);
     toggle.syncState();
 
-    initLocation();
+    //initLocation();
     requestWeather();
   }
 
@@ -127,25 +131,23 @@ public class MainActivity extends AppCompatActivity {
     params.put("cityid", "CN101210101");
     params.put("key", Const.HeFengAppKey);
 
+    Gson gson = new GsonBuilder().registerTypeAdapterFactory(new ResponseAdapterFactory()).create();
+
     new Retrofit.Builder().baseUrl(Const.Domain)
+        .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
         .create(WeatherService.class)
         .getWeather(params)
-        .enqueue(new Callback<ResponseBody>() {
-          @Override
-          public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            Toast.makeText(MainActivity.this, "suceess", Toast.LENGTH_SHORT).show();
-            try {
-              hanldWeather(response.body().string());
-            } catch (JSONException e) {
-              e.printStackTrace();
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
+        .enqueue(new Callback<List<WeatherInfo>>() {
+          @Override public void onResponse(Call<List<WeatherInfo>> call, Response<List<WeatherInfo>> response) {
+            Toast.makeText(MainActivity.this, "success", Toast.LENGTH_SHORT).show();
           }
 
-          @Override public void onFailure(Call<ResponseBody> call, Throwable t) {
-            Toast.makeText(MainActivity.this, "failed", Toast.LENGTH_SHORT).show();
+          @Override public void onFailure(Call<List<WeatherInfo>> call, Throwable t) {
+            if (t instanceof ResponseException) {
+              Toast.makeText(MainActivity.this, getString(((ResponseException) t).getErrMessage()),
+                  Toast.LENGTH_SHORT).show();
+            }
           }
         });
   }
@@ -164,14 +166,5 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
-  private void hanldWeather(String content) throws JSONException {
-    JSONObject jsonObject = new JSONObject(content);
-    JSONArray dataBody = jsonObject.getJSONArray("HeWeather data service 3.0");
 
-    List<WeatherInfo> weatherInfoList = new GsonBuilder().create()
-        .fromJson(dataBody.toString(), new TypeToken<List<WeatherInfo>>() {
-        }.getType());
-
-    mShow.setText(weatherInfoList.get(0).getAqi().getCity().getAqi().toString());
-  }
 }

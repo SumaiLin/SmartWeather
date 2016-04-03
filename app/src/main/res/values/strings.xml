@@ -3,4 +3,11 @@
 
   <string name="open_drawerlayout">Open DrawerLayout</string>
   <string name="close_drawerlayout">Close DrawerLayout</string>
+  <!--api返回错误信息-->
+  <string name="api_error_1">错误用户Key</string>
+  <string name="api_error_2">未知城市</string>
+  <string name="api_error_3">超过访问次数</string>
+  <string name="api_error_4">服务无响应或超时</string>
+  <string name="api_error_5">没有访问的权限</string>
+  <string name="unknow_error">未知错误</string>
 </resources>
