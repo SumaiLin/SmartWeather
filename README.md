@@ -1,0 +1,2 @@
+# SmartWeather
+此demo是用来联系retrofit还有gson作为解析工具的。当中使用到的图片都是从就看天气中获取的，在这里谢谢就看天气的作者@Hugo Xie
