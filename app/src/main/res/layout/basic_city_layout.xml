@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/mini_margin"
+    android:clickable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="2dp"
+    app:cardElevation="2dp"
+    >
+
+  <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:padding="@dimen/unit_margin"
+      >
+    <ImageView
+        android:id="@+id/iv_weather_avatar"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_centerVertical="true"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/ic_sunny"
+        />
+
+    <TextView
+        android:id="@+id/tv_max_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/iv_weather_avatar"
+        android:textSize="12sp"
+        tools:text="22"
+        />
+
+    <TextView
+        android:id="@+id/tv_min_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/iv_weather_avatar"
+        android:layout_alignParentRight="true"
+        android:textSize="12sp"
+        tools:text="22"
+        />
+
+    <TextView
+        android:id="@+id/tv_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/unit_margin"
+        android:layout_marginRight="@dimen/unit_margin"
+        android:layout_toLeftOf="@id/tv_max_temperature"
+        android:textSize="50sp"
+        tools:text="22"
+        />
+
+    <TextView
+        android:id="@+id/tv_air_quality"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/tv_min_temperature"
+        android:layout_marginTop="@dimen/half_margin"
+        android:textSize="12sp"
+        tools:text="空气质量"
+        />
+
+    <TextView
+        android:id="@+id/tv_pm_quality"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/tv_air_quality"
+        android:layout_below="@id/tv_min_temperature"
+        android:layout_marginRight="@dimen/unit_margin"
+        android:layout_toLeftOf="@id/tv_air_quality"
+        android:textSize="12sp"
+        tools:text="pm2.5"
+        />
+
+  </RelativeLayout>
+
+</android.support.v7.widget.CardView>

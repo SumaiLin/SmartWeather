@@ -10,4 +10,10 @@
   <string name="api_error_4">服务无响应或超时</string>
   <string name="api_error_5">没有访问的权限</string>
   <string name="unknow_error">未知错误</string>
+
+  <string name="max_temperature">最高气温:%s°C</string>
+  <string name="min_temperature">最低气温:%s°C</string>
+  <string name="temperature">%s°C</string>
+  <string name="air_quality">空气质量:%s</string>
+  <string name="pm_quality">PM25:%s</string>
 </resources>
